@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.eyal" 
+        name="Eyal TV Add-ons" 
+        version="1.0.0"
+        provider-name="Eyal">
+    <extension point="xbmc.addon.repository" 
+        name="Eyal TV Add-ons">
+        <info compressed="false">https://raw.githubusercontent.com/Eyal87/repository.eyal/master/addons.xml</info>
+        <checksum>https://raw.githubusercontent.com/Eyal87/repository.eyal/master/addons.xml.md5</checksum>
+        <datadir zip="true">https://raw.githubusercontent.com/Eyal87/repository.eyal/master/repo</datadir>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Install add-ons from Eyal's add-on repository</summary>
+        <description>Eyal's Kodi Repository</description>
+        <platform>all</platform>
+    </extension>
+</addon>
