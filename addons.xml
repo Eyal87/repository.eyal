@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addons>
+<addon id="plugin.video.annatel.tv" name="Annatel TV" version="2.0" provider-name="Eyal Rahmani, Ariel Lasry">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension point="xbmc.service" library="service.py" start="[login|startup]"/>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary>Annatel TV</summary>
+    <description>Annatel TV</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+<addon id="plugin.video.annateltvvod"
+       name="Annatel TV VOD"
+       version="0.1"
+       provider-name="Annatel">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+             library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary>Annatel TV VOD</summary>
+    <description>Annatel TV VOD
+    </description>
+    <platform>all</platform>
+  </extension>
+</addon>
+</addons>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.annateltvvod"
+       name="Annatel TV VOD"
+       version="0.1"
+       provider-name="Annatel">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+             library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary>Annatel TV VOD</summary>
+    <description>Annatel TV VOD
+    </description>
+    <platform>all</platform>
+  </extension>
+</addon>
