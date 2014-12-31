@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-<addon id="plugin.video.annatel.tv" name="Annatel TV" version="2.0" provider-name="Eyal Rahmani, Ariel Lasry">
+<addon id="plugin.video.annatel.tv" name="Annatel TV" version="2.01" provider-name="Eyal Rahmani, Ariel Lasry">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
   </requires>

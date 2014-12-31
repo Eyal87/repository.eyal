@@ -31,7 +31,7 @@ def LoadLogin():
 	if (resp):
 		common.OpenSettings()
 	else:
-		common.ShowNotification("Authentification!\nMerci d\'entrer votre login et mot de passe Annatel TV", 10000, addon=__Addon__)
+		common.ShowNotification("Authentification!\nMerci d\'entrer votre login et mot de passe Annatel TV", 10, addon=__Addon__)
 
 def GetTVChannels():
 	if (IsLoggedIn()):

@@ -215,7 +215,7 @@ def ShowNotification(msg, duration, title=__DefaultTitle__, addon=None, sound=Fa
 def YesNoDialog(line1, line2 = None, line3 = None, title=__DefaultTitle__, nolabel=None, yeslabel=None):
 	dlg = xbmcgui.Dialog()
 	response = dlg.yesno(title, line1, line2, line3, nolabel, yeslabel)
-	return 
+	return response
 
 def OpenSettings():
 	#xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)

@@ -34,6 +34,7 @@ def OnLoad():
 		loggedInOnLoad = True
 		tvCounter = 0
 		epgCounter = 0
+		myIPTVSimple.GetIptvAddon(show_message=True)
 		CheckUpdates()
 
 def OnExit():
@@ -56,7 +57,7 @@ def CheckUpdates():
 	global tvThread
 	global epgCounter
 	global epgThread
-	while ((not xbmc.abortRequested) and (annatel.IsLoggedIn())):
+	while ((not xbmc.abortRequested) and (annatel.IsLoggedIn()) and (myIPTVSimple.GetIptvAddon() is not None)):
 		tvCounter  -= __WaitInterval__
 		epgCounter -= __WaitInterval__
 		
@@ -110,7 +111,7 @@ def UpdateEPG():
 
 OnLoad()
 while (not xbmc.abortRequested):
-	if (annatel.IsLoggedIn()):
+	if ((annatel.IsLoggedIn()) and (myIPTVSimple.GetIptvAddon() is not None)):
 		CheckUpdates()
 	else:
 		SleepFor(__LoginInterval__)
