@@ -38,7 +38,7 @@ def RefreshIPTVlinks(channel_list):
 	
 	common.ShowNotification("Updating links...", 300000, addon=__Addon__)
 	
-	is_logo_extension = iptvAddon.getAddonInfo('version')  >= "1.9.3"
+	is_logo_extension = common.IsNewVersion(iptvAddon.getAddonInfo('version'), "1.9.3")
 	finalM3Ulist = MakeM3U(channel_list, is_logo_extension)
 	finalM3Ufilename = os.path.join(__AddonDataPath__, 'iptv.m3u') # The final m3u file location.
 	current_file = common.ReadFile(finalM3Ufilename)

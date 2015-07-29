@@ -6,7 +6,7 @@ import common
 from xml.dom.minidom import parseString
 
 URL_XML_FEED = 'http://www.annatel.tv/api/getchannels?login=%s&password=%s'
-URL_EPG_FEED = 'http://kazer.org/tvguide.zip?u=wh23qzyt7hdvp'
+URL_EPG_FEED = 'http://xmltv.dtdns.net/alacarte/ddl?fichier=/xmltv_site/xmlPerso/arielus.zip'
 __AddonID__ = 'plugin.video.annatel.tv'
 __Addon__ = xbmcaddon.Addon(__AddonID__)
 __AddonDataPath__ = os.path.join(xbmc.translatePath( "special://userdata/addon_data").decode("utf-8"), __AddonID__)
@@ -63,7 +63,7 @@ def GetTVChannels():
 
 
 def GetEPG():
-	epg_xml = common.ReadZipUrl(URL_EPG_FEED, "tvguide.xml", onDownloadFailed=EPGFailed, onDownloadSuccess=EPGSuccess)
+	epg_xml = common.ReadZipUrl(URL_EPG_FEED, "arielus.xml", onDownloadFailed=EPGFailed, onDownloadSuccess=EPGSuccess)
 	local_epg = os.path.join(__EPG__, "tvguide.xml")
 	if (epg_xml is not None):
 		common.WriteFile(epg_xml, local_epg)
@@ -166,36 +166,46 @@ def ParseEPG(epg_xml):
 def FixEPGChannelsIDs(epg):
 	if (epg is not None):
 		ids = {
-			"ART1.kazer.org"	:	"Arte",
-			"BEI1.kazer.org"	:	"BeIN Sport 1", #BeIN Sport 1 HD
-			"BEI2.kazer.org"	:	"BeIN Sport 2", #BeIN Sport 2 HD
-			"BFM1.kazer.org"	:	"BFM TV",
-			".kazer.org"	:	"Canal +",
-			"CAN3.kazer.org"	:	"Canal+ Cinéma",
-			"CAN5.kazer.org"	:	"Canal+ Sport",
-			"CIN6.kazer.org"	:	"Cine+ Premier",
-			"EUR2.kazer.org"	:	"D17",
-			#"DIR1.kazer.org"	:	"",
-			"EQU1.kazer.org"	:	"Equidia",
-			"EUR6.kazer.org"	:	"EuroNews",
-			"EUR3.kazer.org"	:	"EuroSport",
-			"EUR4.kazer.org"	:	"EuroSport2",
-			"FRA2.kazer.org"	:	"France 2",
-			"FRA16.kazer.org"	:	"France 24",
-			"FRA3.kazer.org"	:	"France 3",
-			"FRA4.kazer.org"	:	"France 4",
-			"FRA5.kazer.org"	:	"France 5",
-			"FRA1.kazer.org"	:	"France O",
-			"GUL1.kazer.org"	:	"Gulli",
-			"ITL1.kazer.org"	:	"i-télé",
-			"LEQ1.kazer.org"	:	"Equipe 21",
-			"M61.kazer.org"	:	"M6",
-			"NRJ1.kazer.org"	:	"NRJ 12",
-			"NT11.kazer.org"	:	"NT1",
-			"RMC2.kazer.org"	:	"RMC Découverte",
-			"TF12.kazer.org"	:	"TF1",
-			"TMC1.kazer.org"	:	"TMC",
-			"W91.kazer.org"	:	"W9"
+			"1"	:	"TF1",
+			"2"	:	"France_2",
+			"3"	:	"France_3",
+			"4"	:	"Canal_+",
+			"5"	:	"France_5",
+			"6"	:	"M6",
+			"7"	:	"Arte",
+			"8"	:	"D8",
+			"9"	:	"W9",
+			"10"	:	"TMC",
+			"11"	:	"NT1",
+			"12"	:	"NRJ_12",
+			"13"	:	"France_4",
+			"15"	:	"BFM_TV",
+			#"16"	:	"i-télé",
+			"16"	:	"i-tele",
+			"17"	:	"D17",
+			#"43"	:	"Canal+_Cinéma",
+			"43"	:	"Canal+_Cinema",
+			"45"	:	"Canal+_Family",
+			"47"	:	"Canal+_Sport",
+			"62"	:	"Cine+_Premier",
+			"68"	:	"Comedie+",
+			"74"	:	"Disney_Channel",
+			"75"	:	"Disney_Cinema",
+			"87"	:	"EuroNews",
+			"89"	:	"EuroSport",
+			"90"	:	"EuroSport2",
+			"119"	:	"France_O",
+			"168"	:	"National_Geo",
+			"171"	:	"NickJr_France",
+			"186"	:	"Paris_Première",
+			"199"	:	"RTL9",
+			#"227"	:	"Téva",
+			"227"	:	"Teva",
+			"288"	:	"France_24",
+			#"4138"	:	"Canal+_Séries",
+			"4138"	:	"Canal+_Series",
+			"4139"	:	"BeIN_Sport_1_HD",
+			"4140"	:	"BeIN_Sport_2_HD"
 		}
 		
 		for channel in epg.channels:

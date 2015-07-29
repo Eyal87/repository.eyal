@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys, urllib, urllib2, os, xbmc, xbmcaddon, xbmcgui, json, codecs, zipfile, random, contextlib
+import sys, urllib, urllib2, os, xbmc, xbmcaddon, xbmcgui, json, codecs, zipfile, random, contextlib, threading, re
 from datetime import datetime, timedelta
 
 __AddonID__ = 'plugin.video.annatel.tv'
@@ -10,9 +10,9 @@ __AddonDataPath__ = os.path.join(xbmc.translatePath( "special://userdata/addon_d
 __DefaultTitle__ = __Addon__.getAddonInfo('name')
 __TempPath__ = os.path.join(__AddonDataPath__, "temp")
 
-sys.path.insert(0, os.path.join(__AddonPath__, "resources", "lib", "mechanize-0.2.5"))
-sys.path.insert(0, os.path.join(__AddonPath__, "resources", "lib", "PythonDropboxUploader"))
-from dbupload import DropboxConnection
+sys.path.insert(0, os.path.join(__AddonPath__, "resources", "lib", "urllib3-1.11"))
+sys.path.insert(0, os.path.join(__AddonPath__, "resources", "lib", "dropbox-python-sdk-2.2.0"))
+import dropbox
 
 random.seed()
 
@@ -28,6 +28,17 @@ def GetDateTimeFromPosix(dt=None):
 		return datetime.now()
 	else:
 		return datetime.utcfromtimestamp(float(dt))
+
+def StartThread(func, args=None):
+	thread = threading.Thread(target=func, args=args)
+	thread.daemon = False
+	thread.start()
+	return thread
+
+def IsNewVersion(new_version, old_version):
+	def normalize(v):
+		return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
+	return (cmp(normalize(new_version), normalize(old_version)) > 0)
 
 def CleanTempFolder():
 	if (os.path.exists(__TempPath__)):
@@ -89,19 +100,24 @@ def DeleteFile(file_path):
 	
 def ReadZipUrl(url, filename, onDownloadSuccess=None, onDownloadFailed=None):
 	response = None
+	download_success_thread = None
 	
 	zipData = DownloadBinary(url)	
 	tmpfile = None
 	if (zipData is None):
 		if (onDownloadFailed is not None):
-			tmpfile = onDownloadFailed()
+			try:
+				tmpfile = onDownloadFailed()
+			except:
+				tmpfile = None
 	else:
 		tmpfile = WriteTempFile(zipData, suffix=".zip")
 		if (onDownloadSuccess is not None):
-			onDownloadSuccess(tmpfile)
-	#print(tmpfile)
+			def onDownloadSuccess_Modified(ods, tf):
+				ods(tf)
+				DeleteFile(tf)
+			download_success_thread = StartThread(onDownloadSuccess_Modified, (onDownloadSuccess, tmpfile,))
 	if (tmpfile is not None):
-		#try:
 		binFile = None
 		if (zipfile.is_zipfile(tmpfile)):
 			with contextlib.closing(zipfile.ZipFile(tmpfile, 'r')) as myZip:
@@ -110,12 +126,8 @@ def ReadZipUrl(url, filename, onDownloadSuccess=None, onDownloadFailed=None):
 		if (binFile is not None):
 			response = binFile
 		
-		DeleteFile(tmpfile)
-		#except:
-		#	pass
-		#finally:
-		#	DeleteFile(tmpfile)
-	
+		if (download_success_thread is None):
+			DeleteFile(tmpfile)
 	return response
 
 def DownloadBinary(url):
@@ -144,11 +156,12 @@ def DownloadFile(link, file_path):
 	return response
 
 def GetDropBoxConnection():
-	return DropboxConnection("annatel.livetv@gmail.com", "annatel987654321")
+	return dropbox.client.DropboxClient("cr_1HVbxjpoAAAAAAAALdk896j1aIxxxq26cP-_gJPI_o77xbE_qrXrDD3fzdXbG")
 
 def UploadDropBoxFile(local_file, remote_path, remote_filename):
 	dbcon = GetDropBoxConnection()
-	dbcon.upload_file(local_file, remote_path, remote_filename)
+	with open(local_file, "rb") as f:
+		dbcon.put_file(remote_path + '/' + remote_filename, f, overwrite=True)
 
 def UploadDropBoxBinary(bin, remote_path, remote_filename):
 	tempfile = WriteTempFile(bin)
@@ -157,7 +170,9 @@ def UploadDropBoxBinary(bin, remote_path, remote_filename):
 
 def DownloadDropBoxFile(remote_path, remote_filename, local_file):
 	dbcon = GetDropBoxConnection()
-	dbcon.download_file(remote_path, remote_filename, local_file)
+	f, metadata = client.get_file_and_metadata(remote_path + '/' + remote_filename)
+	with open(local_file, "wb") as out:
+		out.write(f.read())
 
 def DownloadDropBoxTempFile(remote_path, remote_filename):
 	tmpfile = GetTempFile()
@@ -225,8 +240,9 @@ def OpenSettings():
 class TV(object):
 	def __init__(self, url, channel_name, tvg_id, tvg_logo=None, tvg_shift=0, group_title=None, radio=False):
 		self.url = url
-		self.tvg_id = tvg_id
-		self.tvg_name = tvg_id.replace(' ','_')
+		#self.tvg_id = tvg_id
+		self.tvg_id = tvg_id.replace('é'.decode("utf8"), 'e').replace(' ','_')
+		self.tvg_name = self.tvg_id #tvg_id.replace('é'.decode("utf8"), 'e').replace(' ','_')
 		self.tvg_logo = tvg_logo
 		self.tvg_shift = tvg_shift
 		self.group_title = group_title
