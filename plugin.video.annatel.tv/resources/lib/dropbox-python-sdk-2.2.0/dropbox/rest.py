@@ -4,7 +4,7 @@ A simple JSON REST request abstraction layer that is used by the
 """
 
 import io
-import pkg_resources
+#import pkg_resources
 import socket
 import ssl
 import sys

@@ -93,9 +93,10 @@ def UpdateEPG():
 	global epgThread
 	result = False
 	try:
+		old_epg = annatel.IsOldEPG()
 		epg = annatel.GetEPG()
 		if (epg is not None):
-			myIPTVSimple.RefreshEPG([epg])
+			myIPTVSimple.RefreshEPG([epg], is_very_new=old_epg)
 		result = (epg is not None)
 	except:
 		result = False

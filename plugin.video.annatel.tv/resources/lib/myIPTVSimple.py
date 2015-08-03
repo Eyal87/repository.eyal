@@ -48,7 +48,6 @@ def RefreshIPTVlinks(channel_list):
 	else:
 		UpdateIPTVSimpleSettings(iptvAddon, restart_pvr=False)
 	# DeleteCache()
-	
 	common.ShowNotification("Updating is done.", 2000, addon=__Addon__)
 	return True
 
@@ -99,7 +98,10 @@ def UpdateIPTVSimpleSettings(iptvAddon = None, restart_pvr = False):
 	if (isSettingsChanged):
 		WriteSettings(settingsDictionary, iptvSettingsFile)
 	if (restart_pvr == True):
-		xbmc.executebuiltin('StartPVRManager')
+		RefreshIPTVSimple()
+
+def RefreshIPTVSimple():
+	xbmc.executebuiltin('StartPVRManager')
 
 def ReadSettings(source, fromFile=False):
 	tree = ET.parse(source) if fromFile else ET.fromstring(source)
@@ -120,49 +122,52 @@ def WriteSettings(settingsDictionary, iptvSettingsFile):
 	common.WriteFile("".join(xml), iptvSettingsFile)
 
 def MakeEPG(epg_list):
-	root = ET.Element("tv")
+	current_tz_diff = common.GetTimezoneDifferenceMinutes()
+	xml_list = []
+	xml_list.append('<?xml version="1.0" encoding="utf-8" ?>')
+	xml_list.append("<tv>")
 	for epg in epg_list:
 		for channel in epg.channels:
-			channel_element = ET.SubElement(root, "channel")
-			channel_element.text = channel.display_name
-			channel_element.set("id", channel.id)
+			xml_list.append('<channel id="%s">%s</channel>' % (channel.id, channel.display_name))
 	
 			for program in channel.programs:
-				program_element = ET.SubElement(root, "programme")
-				program_element.set("start", program.start)
-				program_element.set("stop", program.stop)
-				program_element.set("channel", channel.id)
+				xml_list.append('<programme start="%s" stop="%s" channel="%s">' % (common.FormatEPGTime(program.start, current_tz_diff), common.FormatEPGTime(program.stop, current_tz_diff), channel.id))
+				xml_list.append('<title>%s</title>' % program.title)
 				
-				ET.SubElement(program_element, "title").text = program.title
 				if (program.subtitle is not None):
-					ET.SubElement(program_element, "sub-title").text = program.subtitle
+					xml_list.append('<sub-title>%s</sub-title>' % program.subtitle)
 				if (program.description is not None):
-					ET.SubElement(program_element, "desc").text = program.description
+					xml_list.append('<desc>%s</desc>' % program.description)
 				if (program.category is not None):
-					category_element = ET.SubElement(program_element, "category")
-					category_element.text = program.category
+					xml_list.append('<category')
 					if (program.category_lang is not None):
-						category_element.set("lang", program.category_lang)
+						xml_list.append(' lang="%s"' % program.category_lang)
+					xml_list.append('>%s</category>' % program.category)
+					
 				if ((program.credits is not None) and (len(program.credits) > 0)):
-					credits_element = ET.SubElement(program_element, "credits")
+					xml_list.append('<credits>')
 					for credit in program.credits:
 						job = credit.keys()[0]
 						name = credit.values()[0]
-						ET.SubElement(credits_element, job).text = name
+						xml_list.append('<%s>%s</%s>' % (job, name, job))
+					xml_list.append('</credits>')
 			
-			if ((program.length is not None) and (program.length_units is not None)):
-				length_element = ET.SubElement(program_element, "length")
-				length_element.text = program.length
-				length_element.set("units", program.length_units)
-			if (program.aspect_ratio is not None):
-				ET.SubElement(ET.SubElement(program_element, "video"), "aspect").text = program.aspect_ratio
-			if (program.star_rating is not None):
-				ET.SubElement(ET.SubElement(program_element, "star-rating"), "value").text = program.star_rating
+				if ((program.length is not None) and (program.length_units is not None)):
+					xml_list.append('<length units="%s">%s</length>' % (program.length_units, program.length))
+				if (program.aspect_ratio is not None):
+					xml_list.append('<video><aspect>%s</aspect></video>' % program.aspect_ratio)
+				if (program.star_rating is not None):
+					xml_list.append('<star-rating><value>%s</value></star-rating>' % program.star_rating)
+				if (program.icon is not None):
+					xml_list.append('<icon src="%s" />' % program.icon)
 				
-	epg_xml = '<?xml version="1.0" encoding="utf-8" ?>' + ET.tostring(root, encoding="utf-8")
+				xml_list.append('</programme>')
+				
+	xml_list.append("</tv>")
+	epg_xml = ''.join(xml_list)
 	return epg_xml
 
-def RefreshEPG(epg_list):
+def RefreshEPG(epg_list, is_very_new=False):
 	if ((epg_list is not None) and (len(epg_list) > 0)):
 		epgFile = os.path.join(__AddonDataPath__, 'epg.xml')
 		restart_pvr = (not os.path.exists(epgFile))
@@ -170,6 +175,8 @@ def RefreshEPG(epg_list):
 		common.WriteFile(epg_xml, epgFile)
 		if (restart_pvr):
 			UpdateIPTVSimpleSettings(restart_pvr=True)
+		elif (is_very_new):
+			RefreshIPTVSimple()
 
 def GetLogo(link, is_logo_extension):
 	if ((link is not None) and (len(link) > 4)):

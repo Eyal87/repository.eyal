@@ -29,6 +29,30 @@ def GetDateTimeFromPosix(dt=None):
 	else:
 		return datetime.utcfromtimestamp(float(dt))
 
+def GetTimezoneDifferenceMinutes():
+	tz_min = int(round((datetime.now() - datetime.utcnow()).total_seconds())) / 60
+	return tz_min
+
+def ParseEPGTimeUTC(epg_time):
+	split_epg = epg_time.split(' ')
+	dt = datetime.strptime(split_epg[0], "%Y%m%d%H%M%S")
+	tz = int(split_epg[1][1:3]) * 60 + int(split_epg[1][3:5])
+	if (split_epg[1][0] == "+"):
+		return (dt - timedelta(minutes=tz))
+	else: #(split_epg[1][0] == "-"):
+		return (dt + timedelta(minutes=tz))
+	
+def FormatEPGTime(time_utc, timezone):
+	time_by_tz = time_utc + timedelta(minutes=timezone)
+	time_formatted = time_by_tz.strftime("%Y%m%d%H%M%S")
+	tz_h = abs(timezone / 60)
+	tz_m = abs(timezone) - tz_h * 60
+	tz_formatted = str(tz_h).zfill(2) + str(tz_m).zfill(2)
+	if (timezone >= 0):
+		return "%s +%s" % (time_formatted, tz_formatted)
+	else:
+		return "%s -%s" % (time_formatted, tz_formatted)
+	
 def StartThread(func, args=None):
 	thread = threading.Thread(target=func, args=args)
 	thread.daemon = False
@@ -181,10 +205,19 @@ def DownloadDropBoxTempFile(remote_path, remote_filename):
 
 def GetDropBoxList(remote_path):
 	dbcon = GetDropBoxConnection()
-	return dbcon.get_dir_list(remote_path)
+	metadata_json = dbcon.metadata(remote_path)
+	result = {}
+	if ("contents" in metadata_json):
+		contents = metadata_json["contents"]
+		for c in contents:
+			f = 0
+			if (len(remote_path) > 1):
+				f = 1
+			childname = c["path"][len(remote_path) + f:]
+			result[childname] = c
+	return result
 
 def GetLastModifiedFromDropBox(remote_path):
-	dbcon = GetDropBoxConnection()
 	dir_list = GetDropBoxList(remote_path)
 	for k,v in dir_list.iteritems():
 		if (k == "modified"):
@@ -195,7 +228,6 @@ def GetLastModifiedFromDropBox(remote_path):
 	return None
 
 def SetLastModifiedToDropBox(remote_path):
-	dbcon = GetDropBoxConnection()
 	tmpfile = GetTempFile()
 	date_str = str(GetPosixDateTime(datetime.now()))
 	WriteFile(date_str, tmpfile)
@@ -279,3 +311,4 @@ class Program(object):
 		self.length_units = None
 		self.aspect_ratio = None
 		self.star_rating = None
+		self.icon = None
