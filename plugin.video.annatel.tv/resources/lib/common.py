@@ -16,11 +16,15 @@ import dropbox
 
 random.seed()
 
+def GetTotalSeconds(delta):
+	total_seconds = (delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 10**6) / 10**6
+	return total_seconds
+
 def GetPosixDateTime(dt=None):
 	if (dt is None):
 		dt = datetime.now()
 	psx = (dt - datetime(1970, 1, 1))
-	total_seconds = (psx.microseconds + (psx.seconds + psx.days * 24 * 3600) * 10**6) / 10**6
+	total_seconds = GetTotalSeconds(psx)
 	return total_seconds
 
 def GetDateTimeFromPosix(dt=None):
@@ -30,7 +34,7 @@ def GetDateTimeFromPosix(dt=None):
 		return datetime.utcfromtimestamp(float(dt))
 
 def GetTimezoneDifferenceMinutes():
-	tz_min = int(round((datetime.now() - datetime.utcnow()).total_seconds())) / 60
+	tz_min = int(round(GetTotalSeconds(datetime.now() - datetime.utcnow()))) / 60
 	return tz_min
 
 def ParseEPGTimeUTC(epg_time):

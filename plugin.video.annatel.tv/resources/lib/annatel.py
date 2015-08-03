@@ -105,14 +105,14 @@ def ParseEPG(epg_xml):
 	if (epg_xml is not None):
 		parsed_epg = ET.fromstring(epg_xml)
 		epg = common.EPG()
-		for channel in parsed_epg.iter('channel'):
+		for channel in parsed_epg.findall('channel'):
 			channel_id = channel.get("id").encode("utf-8")
 			display_name = channel.find('display-name').text.encode("utf-8")
 			channel_epg = common.Channel(channel_id, display_name)
 			epg.channels.append(channel_epg)
 		
 		current_channel = None
-		for program in parsed_epg.iter('programme'):
+		for program in parsed_epg.findall('programme'):
 			start = common.ParseEPGTimeUTC(program.get("start").encode("utf-8"))
 			stop = common.ParseEPGTimeUTC(program.get("stop").encode("utf-8"))
 			title = program.find('title').text.encode("utf-8")
